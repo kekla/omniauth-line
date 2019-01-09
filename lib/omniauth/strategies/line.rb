@@ -26,6 +26,8 @@ module OmniAuth
       def build_access_token
         verifier = request.params["code"]
         get_token_params = {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true))
+        Rails.logger.info "get_token_params: #{get_token_params.inspect}"
+        Rails.logger.info "client: #{client.inspect}"
         result = client.auth_code.get_token(verifier, get_token_params, deep_symbolize(options.auth_token_params))
         return result
       end
