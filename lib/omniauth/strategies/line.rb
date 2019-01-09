@@ -7,6 +7,10 @@ module OmniAuth
       option :name, 'line'
       option :scope, 'profile openid email'
 
+      option :token_params, {
+        grant_type: 'authorization_code'
+      }
+
       option :client_options, {
         site: 'https://access.line.me',
         authorize_url: '/oauth2/v2.1/authorize',
@@ -17,6 +21,17 @@ module OmniAuth
       def callback_phase
         options[:client_options][:site] = 'https://api.line.me'
         super
+      end
+
+      def build_access_token
+        verifier = request.params["code"]
+        get_token_params = {:redirect_uri => callback_url}.merge(token_params.to_hash(:symbolize_keys => true))
+        result = client.auth_code.get_token(verifier, get_token_params, deep_symbolize(options.auth_token_params))
+        return result
+      end
+
+      def callback_url
+        full_host + script_name + callback_path
       end
 
       uid { raw_info['userId'] }
